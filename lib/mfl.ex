@@ -8,13 +8,21 @@ defmodule MFL do
   """
 
   @doc """
-  Appends params to urls passed to HttPoison; overrides HttPoison.Base.process_url 
+  Appends params to urls passed to HTTPoison; overrides HttPoison.Base.process_url 
   """
   def request_url(type, year, param_list \\ []) do
     base_url = "http://www.myfantasyleague.com/#{year}/export?"
     param_list = param_list ++ [json: "1"]
     base_url <> url_params(param_list) <> "&TYPE=#{type}"
   end
+
+  @doc """
+  Execute HTTP request to MFL API and return response.
+
+  Note that calls to wwww.myfantasyleague.com are redirected to
+  www##.myfantasyleague.com where is the URL for the real host, hence
+  the "follow_redirect: true" option passed to HTTPoison.get.
+  """
 
   defp fetch(type, year, param_list \\ []) do
     url = request_url(type, year, param_list)
@@ -28,7 +36,7 @@ defmodule MFL do
   @doc """
   Takes string values for a league and year and returns a list of player IDs as strings.
 
-  Reference API call: "http://www.myfantasyleague.com/2018/export&TYPE=freeAgents&L=66666&JSON=1
+  Reference API call: http://www.myfantasyleague.com/2018/export&TYPE=freeAgents&L=66666&JSON=1
   """
   def freeAgents(year, league) do
     {:ok, response} = fetch("freeAgents", year, [l: league])
@@ -45,7 +53,7 @@ defmodule MFL do
   @doc """
   Takes string values for year and returns a list of maps with player data.
 
-  Reference API call: "http://www.myfantasyleague.com/2018/export&TYPE=players&JSON=1
+  Reference API call: http://www.myfantasyleague.com/2018/export&TYPE=players&JSON=1
   """
   def players(year) do
     {:ok, response} = fetch("players", year)
@@ -60,7 +68,7 @@ defmodule MFL do
   Each franchise has an id (string) and a map of players 
   (id, contract info and status ("ROSTER"|"TAXI SQUAD"|"INJURED RESERVE").
 
-  Reference API call: "http://www.myfantasyleague.com/2018/export&TYPE=rosters&L=66666&JSON=1
+  Reference API call: http://www.myfantasyleague.com/2018/export&TYPE=rosters&L=66666&JSON=1
   """
 
   def rosters(year, league) do
@@ -74,7 +82,7 @@ defmodule MFL do
   @doc """
   Takes string values for year and returns a list of maps with salary adjustment data.
 
-  Reference API call: "http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustements&L=66666&JSON=1
+  Reference API call: http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustements&L=66666&JSON=1
   """
 
   def salaryAdjustments(year, league) do
@@ -83,5 +91,19 @@ defmodule MFL do
         |> Poison.decode!
         |> Map.get("salaryAdjustments")
         |> Map.get("salaryAdjustment")
+  end
+
+  @doc """
+  Takes string values for year and league ID and returns various data about the league.
+  Best source available for retrieving league and franchise names.
+
+  Reference API call: http://www.myfantasyleague.com/2018/export&TYPE=league&L=66666&JSON=1
+  """
+
+  def league(year, league) do
+    {:ok, response} = fetch("league", year, [l: league])
+      response.body
+        |> Poison.decode!
+        |> Map.get("league")
   end
 end
