@@ -148,14 +148,12 @@ defmodule MFL do
     |> Map.get("id")
   end
 
-  @doc false
   defp request_url(type, year, param_list \\ []) do
     base_url = "http://www.myfantasyleague.com/#{year}/export?"
     param_list = param_list ++ [json: "1"]
     base_url <> url_params(param_list) <> "&TYPE=#{type}"
   end
 
-  @doc false
   # MFL documentation describing their API
   # authentication process is at:
   #
@@ -173,28 +171,22 @@ defmodule MFL do
     |> List.last()
   end
 
-  @doc false
   # Note that calls to wwww.myfantasyleague.com
   # are redirected to www##.myfantasyleague.com,
   # hence the "follow_redirect: true" option 
-  # being passed to HTTPoison.get\3.
+  # being passed as an option to HTTPoison.get/3.
   defp fetch(type, year, param_list \\ [], auth_token \\ "") do
     url = request_url(type, year, param_list)
     options = [follow_redirect: true] ++ cookie(auth_token)
     HTTPoison.get(url, [], options)
   end
 
-  @doc false
   defp url_params(params) do
     Enum.map_join(params,"&",(fn {k,v} -> Atom.to_string(k) <> "=" <> v end)) |> String.upcase
   end
 
-  @doc false
-  defp cookie(auth_token = "") do
-    []
-  end
+  defp cookie(""), do: []
 
-  @doc false
   defp cookie(auth_token) do
     [hackney: [cookie: ["MFL_USER_ID=#{auth_token}"]]]
   end
