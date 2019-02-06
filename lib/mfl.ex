@@ -15,7 +15,7 @@ defmodule MFL do
 
   @doc """
   Returns a list of player id's for free agents.
-  
+
   Just id's are returned; the id's must then
   be merged with data from the  players endpoint 
   or elsewhere to incorpoate any  related date, 
@@ -25,21 +25,22 @@ defmodule MFL do
   http://www59.myfantasyleague.com/2015/export&TYPE=freeAgents&L=35465&JSON=1
   """
   def freeAgents(year, league) do
-    {:ok, response} = fetch("freeAgents", year, [l: league])
-      response.body
-        |> Poison.decode!
-        |> Map.get("freeAgents")
-        |> Map.get("leagueUnit")
-        |> Map.get("player")
-        |> Enum.map(&(Map.take(&1,["id"])))
-        |> Enum.map(&(Map.values(&1)))
-        |> List.flatten
+    {:ok, response} = fetch("freeAgents", year, l: league)
+
+    response.body
+    |> Poison.decode!()
+    |> Map.get("freeAgents")
+    |> Map.get("leagueUnit")
+    |> Map.get("player")
+    |> Enum.map(&Map.take(&1, ["id"]))
+    |> Enum.map(&Map.values(&1))
+    |> List.flatten()
   end
 
   @doc """
   Returns the entire list of players in the MFL database
   with basic details.
-  
+
   The MFL API also supports limiting the query to a 
   specified player or list of players, or to changes
   since a specified time. It also provides an option
@@ -56,10 +57,11 @@ defmodule MFL do
   """
   def players(year) do
     {:ok, response} = fetch("players", year)
-      response.body
-        |> Poison.decode!
-        |> Map.get("players")
-        |> Map.get("player")
+
+    response.body
+    |> Poison.decode!()
+    |> Map.get("players")
+    |> Map.get("player")
   end
 
   @doc """
@@ -72,11 +74,12 @@ defmodule MFL do
   http://www59.myfantasyleague.com/2015/export&TYPE=rosters&L=35465&JSON=1
   """
   def rosters(year, league) do
-    {:ok, response} = fetch("rosters", year, [l: league])
-      response.body
-        |> Poison.decode!
-        |> Map.get("rosters")
-        |> Map.get("franchise")
+    {:ok, response} = fetch("rosters", year, l: league)
+
+    response.body
+    |> Poison.decode!()
+    |> Map.get("rosters")
+    |> Map.get("franchise")
   end
 
   @doc """
@@ -94,16 +97,17 @@ defmodule MFL do
   http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustments&L=66666&JSON=1
   """
   def salaryAdjustments(year, league) do
-    {:ok, response} = fetch("salaryAdjustments", year, [l: league])
-      response.body
-        |> Poison.decode!
-        |> Map.get("salaryAdjustments")
-        |> Map.get("salaryAdjustment")
+    {:ok, response} = fetch("salaryAdjustments", year, l: league)
+
+    response.body
+    |> Poison.decode!()
+    |> Map.get("salaryAdjustments")
+    |> Map.get("salaryAdjustment")
   end
 
   @doc """
   Returns various league settings data.
-  
+
   Also includes some franchise information and 
   links to previous years' home pages.
 
@@ -111,16 +115,16 @@ defmodule MFL do
   http://www59.myfantasyleague.com/2015/export&TYPE=league&L=35465&JSON=1
   """
   def league(year, league) do
-    {:ok, response} = fetch("league", year, [l: league])
-      response.body
-        |> Poison.decode!
-        |> Map.get("league")
-  end
+    {:ok, response} = fetch("league", year, l: league)
 
+    response.body
+    |> Poison.decode!()
+    |> Map.get("league")
+  end
 
   @doc """
   Returns the league data for an authenticated user.
-  
+
   Accepts a user name and password, and if the user
   is authenticated, passes a user cookie with the 
   request, which then returns additional information,
@@ -130,9 +134,10 @@ defmodule MFL do
   def league(year, league, username, password) do
     auth_token = token(username, password)
     {:ok, response} = fetch("league", year, [l: league], auth_token)
-      response.body
-        |> Poison.decode!
-        |> Map.get("league")
+
+    response.body
+    |> Poison.decode!()
+    |> Map.get("league")
   end
 
   @doc """
@@ -144,7 +149,7 @@ defmodule MFL do
     |> Map.get("franchises")
     |> Map.get("franchise")
     |> Enum.filter(&(&1["username"] == username))
-    |> List.first
+    |> List.first()
     |> Map.get("id")
   end
 
@@ -159,11 +164,12 @@ defmodule MFL do
   #
   # http://www.myfantasyleague/2019/api_info
   defp token(username, password) do
-    base  = "https://api.myfantasyleague.com/2018/login?"
+    base = "https://api.myfantasyleague.com/2018/login?"
     params = "USERNAME=#{username}&PASSWORD=#{password}&XML=1"
     response = HTTPoison.get!(base <> params)
+
     response.headers
-    |> Map.new
+    |> Map.new()
     |> Map.get("Set-Cookie")
     |> String.split("; ")
     |> List.first()
@@ -182,7 +188,7 @@ defmodule MFL do
   end
 
   defp url_params(params) do
-    Enum.map_join(params,"&",(fn {k,v} -> Atom.to_string(k) <> "=" <> v end)) |> String.upcase
+    Enum.map_join(params, "&", fn {k, v} -> Atom.to_string(k) <> "=" <> v end) |> String.upcase()
   end
 
   defp cookie(""), do: []
