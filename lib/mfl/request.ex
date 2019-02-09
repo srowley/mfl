@@ -1,4 +1,5 @@
 defmodule MFL.Request do
+  @base_url Application.get_env(:mfl, :base_url) 
   @moduledoc false 
 
   # defguard token_in?(value) when length(value) > 1 and elem(hd(value),0) == :token
@@ -43,8 +44,8 @@ defmodule MFL.Request do
   end
 
   defp request_url(type, year, options \\ %{}) do
-    "https://www.myfantasyleague.com/"
-    |> Kernel.<>("#{year}/export?")
+    @base_url
+    |> Kernel.<>("/#{year}/export?")
     |> Kernel.<>("TYPE=#{type}")
     |> Kernel.<>(to_params(options))
     |> Kernel.<>("&JSON=1")

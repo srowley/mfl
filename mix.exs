@@ -23,6 +23,7 @@ defmodule MFL.MixProject do
   defp deps do
     [
       {:poison, "~> 4.0"},
+      {:bypass, "~> 1.0", only: :test},
       {:httpoison, "~> 1.5"}
     ]
   end
