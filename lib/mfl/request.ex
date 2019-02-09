@@ -2,9 +2,7 @@ defmodule MFL.Request do
   @base_url Application.get_env(:mfl, :base_url) 
   @moduledoc false 
 
-  # defguard token_in?(value) when length(value) > 1 and elem(hd(value),0) == :token
-
-  def fetch(type, year, options \\ []) do #when token_in?(options) do
+  def fetch(type, year, options \\ []) do
     cookie =
       if Keyword.has_key?(options, :token) do
         options
@@ -20,15 +18,6 @@ defmodule MFL.Request do
     |> HTTPoison.get([], [follow_redirect: true] ++ cookie)
   end
 
-  # def fetch(type, year, options \\ []) do
-  #   request_url(type, year, options)
-  #   |> HTTPoison.get([], [follow_redirect: true])
-  # end
-
-  # MFL documentation describing their API
-  # authentication process is at:
-  #
-  # http://www.myfantasyleague/2019/api_info
   def token(username, password) do
     base = "https://api.myfantasyleague.com/2018/login?"
     params = "USERNAME=#{username}&PASSWORD=#{password}&XML=1"
