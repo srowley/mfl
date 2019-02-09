@@ -13,7 +13,6 @@ defmodule MFL.Request do
         []
       end
 
-    IO.puts request_url(type, year, Keyword.delete(options, :token))
     request_url(type, year, Keyword.delete(options, :token))
     |> HTTPoison.get([], [follow_redirect: true] ++ cookie)
   end
