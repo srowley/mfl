@@ -7,7 +7,10 @@ defmodule MFL.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      name: "MFL",
+      docs: [main: "MFL",
+             extras: ["README.md"]]
     ]
   end
 
@@ -24,6 +27,7 @@ defmodule MFL.MixProject do
     [
       {:poison, "~> 4.0"},
       {:bypass, "~> 1.0", only: :test},
+      {:ex_doc, "~>0.19", only: :dev, runtime: false},
       {:httpoison, "~> 1.5"}
     ]
   end

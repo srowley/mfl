@@ -1,42 +1,30 @@
 defmodule MFL.League do
   @moduledoc """
-  Elixir wrapper for MFL API functions which
-  return information for a given league.
+  Wrapper for requests which return information for a specific
+  league.
 
-  This module contains functions that make API
-  calls that require a league id as an argument 
-  (and therefore return information just for a
-  given league).
+  This module contains functions that make API requests that 
+  require a league `id` as an argument.
 
-  The structure for every call is
-  "end_point(year, id, options)" where the id
-  is a league id and the MFL endpoint name is
-  "endPoint".
+  The structure for every call is `MFL.League.request_type(year, id, options)`
+  where the `id` is a league `id` and the MyFantasyLeague request 
+  name is "requestType".
 
-  Because the year is in all likelihood going 
-  to be a configured value applicable across 
-  all leagues, it can be convenient to set its
-  value once as a module attribute for use in
-  these functions.
+  See the `MFL` module documentation for a discussion of optional 
+  request/function parameters.
   """
 
   import MFL.Request
 
   @doc """
-  Returns a list of player id's for free agents.
+  Returns a list of player `id`s for free agents.
 
-  Just id's are returned; the id's must then
-  be merged with data from the  players endpoint 
-  or elsewhere to incorpoate any  related date, 
-  such as the player's name or team.
+  Just `id`s are returned; these must then be merged with data 
+  from the other requests (e.g. `MFL.players/2` or elsewhere 
+  to incorporate any related data such as the player's name or 
+  team.
 
-  Options:
-
-  position: ("QB", "RB", etc.)
-  filters list by position
-
-  Sample document:
-  http://www59.myfantasyleague.com/2015/export&TYPE=freeAgents&L=35465&JSON=1
+  [MyFantastyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=freeAgents)
   """
   def free_agents(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
@@ -58,21 +46,15 @@ defmodule MFL.League do
   end
 
   @doc """
-  Returns a map of rosters for each league franchise.
+  Returns rosters (list of players and player data) and franchise
+  `id` for each franchise.
 
-  Each franchise has an id (string) and a list of players.
-  Each player item includes roster status
-  ("ROSTER"|"TAXI SQUAD"|"INJURED RESERVE") and possibly
-  other date depending on league settings, such as salary
-  information in salary cap leagues.
+  Each franchise has an `id` (string) and a list of players (maps).
+  Each player map includes roster status (`"ROSTER"`|`"TAXI SQUAD"`
+  |`"INJURED RESERVE"`) and possibly other data depending on league 
+  settings, such as salary information in salary cap leagues.
 
-  Options:
-
-  franchise: franchise_id 
-  returns roster for specified franchise only 
-
-  Sample document:
-  http://www59.myfantasyleague.com/2015/export&TYPE=rosters&L=35465&JSON=1
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=rosters)
   """
   def rosters(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
@@ -92,16 +74,15 @@ defmodule MFL.League do
   @doc """
   Returns a list of maps with salary adjustment data.
 
-  Note that the amount of the adjustment is a decimal
-  string, e.g., "2.00". Also note that the value applied
-  to the cap is the total of all adjustments. This can 
-  be confusing because the MFL site page that displays 
-  adjustments for a team only show as subset, so if 
-  there is a long history of adjustments, the sum of 
-  the values displayed does not equal the amount applied.
+  Note that the amount of the adjustment can be a decimal string, 
+  e.g., `2.00`. Also note that the value applied to the cap is the 
+  total of all adjustments. This can be confusing because the 
+  MyFantasyLeague website page that displays adjustments for a team 
+  only shows the most recent adjustments, so if there is a long history 
+  the sum of the values displayed on the website does not equal 
+  the amount actually applied.
 
-  Reference API call:
-  http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustments&L=66666&JSON=1
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=salaryAdjustments)
   """
   def salary_adjustments(year, league) do
     case fetch("salaryAdjustments", year, l: league) do
@@ -117,13 +98,12 @@ defmodule MFL.League do
   end
 
   @doc """
-  Returns various league settings data.
+  Returns league settings data for the specified league.
 
-  Also includes some franchise information and 
-  links to previous years' home pages.
+  Also includes some franchise information and links to previous years'
+  home pages for that league.
 
-  Sample document:
-  http://www59.myfantasyleague.com/2015/export&TYPE=league&L=35465&JSON=1
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
   """
   def league(year, league) do
     case fetch("league", year, l: league) do

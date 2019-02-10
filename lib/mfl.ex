@@ -1,16 +1,30 @@
 defmodule MFL do
   @moduledoc """
-  Selective Elixir wrapper for the MyFantasyLeague Developer (JSON) API.
+  This module includes wrappers for requests that are not
+  tied to a specific league.
 
-  This version only supports endpoints that are required
-  to support a simple replacement auction app. All values
-  are returned as strings. Notably MFL "id's for some entities
-  (.e.g. franchises and players) are strings of digits
-  which often include leading zeroes.
+  Most requests supported by MFL are intended to retrieve
+  data from a given league. These functions are housed in `MFL.League`.
 
-  MFL data structures also seem somewhat arbitrary
-  with respect to whether children of a node are
-  modeled as attributes or nodes.
+  Functions that correspond directly to a MyFantasyLeague
+  request are structured as follows:
+
+  |                 |MyFantasyLeague         |MFL               |
+  |-----------------|------------------------|------------------|
+  |Request/function |players                 |`MFL.players/2`   |
+  |Parameters       |DETAILS, SINCE, PLAYERS |`year`, `options` |
+
+  `year` is a string corresponding to the league year.
+  
+  `options` is a keyword list corresponding to the optional
+  (downcased) request parameters, e.g. `[details: "1"]`. MFL is 
+  designed to support optional parameters but this support is not 
+  tested. Optional parameters are documented on the
+  [MyFantasyLeague Request Reference page](https://www03.myfantasyleague.com/2018/api_info?STATE=details).
+
+  `MFL` also provides a convenience function - `MFL.franchise_for_user/4`
+  to return the franchise `id` for a given user's team in a given 
+  league.
   """
 
   import MFL.Request
@@ -19,25 +33,18 @@ defmodule MFL do
   Returns the entire list of players in the MFL database
   with basic details.
 
-  The MFL API also supports limiting the query to a 
-  specified player or list of players, or to changes
+  MyFantasyLeague optionally supports limiting the query to 
+  a specified player or list of players, or to changes
   since a specified time. It also provides an option
   to retrieve an expanded set of details. These
-  options are not supported at this time.
+  options should work with MFL but have not been tested.
 
-  MFL strongly recommends caching the results of this call
-  given the size of the returned dataset (~2000 rows), and
-  the fact that is only typically updated no more
+  MyFantasyLeague strongly recommends caching the results of
+  this call given the size of the returned dataset (~2000 rows)
+  and the fact that the data is typically updated no more
   frequently than once per day.
-
-  Options
-
-  details: (1) includes additional data, e.g. id's at other sites
-  since: (Unix timestamp) limit to changes since this time
-  players: (comma-separated list of id's) filter by player(s)
-
-  Reference API call:
-  http://www.myfantasyleague.com/[YEAR HERE]/export&TYPE=players&JSON=1
+  
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=players)
   """
   def players(year, options \\ []) do
     case fetch("players", year, options) do
@@ -53,13 +60,15 @@ defmodule MFL do
   end
 
   @doc """
-  Returns the league data for an authenticated user.
+  Returns league descriptive and configuration data. This 
+  request has no optional parameters.
 
-  Accepts a user name and password, and if the user
-  is authenticated, passes a user cookie with the 
-  request, which then returns additional information,
-  in particular the franchise id for that user's
-  franchise.
+  If passed an authentication token, additional details
+  for the authenticated user are included in the results.
+  This is currently only used internally to support 
+  `franchise_for_user\4`.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
   """
   def league(year, league, token) do
     case fetch("league", year, token: token, l: league) do
@@ -74,8 +83,16 @@ defmodule MFL do
   end
 
   @doc """
-  Returns the franchise id associated with an 
-  authenticated user.
+  Returns the franchise `id` for the team owned by the specified
+  user in the specified league.
+
+  Not a direct call to an MFL request - this function returns 
+  the franchise `id` associated with a given user. This is
+  only available if the user has been authenticated. Thus the
+  function requires a valid username and password for that user. 
+
+  Note that MyFantasyLeague franchise `id`s are strings
+  and contain leading zeroes.  
   """
   def franchise_for_user(year, league, username, password) do
     league(year, league, token(username, password))
