@@ -12,6 +12,18 @@ defmodule MFLLeagueTest do
     }
   end
 
+  test "bad league", %{year: year, bypass: bypass} do
+    league = "426189"
+    Bypass.expect_once bypass, fn conn ->
+      assert "/#{year}/export" == conn.request_path
+      assert "TYPE=freeAgents&L=#{league}&JSON=1" == conn.query_string
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 500, "HTTP Server Error.")
+    end
+
+    assert League.free_agents(year, league) == %{error: "MFL server error; check parameters."}
+  end
+
   test "free_agents/3", %{league: league, year: year, bypass: bypass} do
     Bypass.expect_once bypass, fn conn ->
       assert "/#{year}/export" == conn.request_path

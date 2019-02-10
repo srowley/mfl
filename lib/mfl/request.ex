@@ -26,6 +26,8 @@ defmodule MFL.Request do
         {:error, "MFL returned 'not found'; check year."}
       {:ok, %HTTPoison.Response{status_code: 500}} ->
         {:error, "MFL server error; check parameters."}
+      {:ok, %HTTPoison.Response{status_code: status_code}} ->
+        {:error, "Error - HTTP status code #{status_code}"}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "HTTPoison error: #{reason}"}
       _ ->
