@@ -15,7 +15,7 @@ defmodule MFL do
   |Parameters       |DETAILS, SINCE, PLAYERS |`year`, `options` |
 
   `year` is a string corresponding to the league year.
-  
+ 
   `options` is a keyword list corresponding to the optional
   (downcased) request parameters, e.g. `[details: "1"]`. MFL is 
   designed to support optional parameters but this support is not 
@@ -46,17 +46,103 @@ defmodule MFL do
   
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=players)
   """
-  def players(year, options \\ []) do
-    case fetch("players", year, options) do
-      {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("players")
-        |> Map.get("player")
 
-      {:error, message} ->
-        %{error: message}
-    end
+  def players(year, options \\ []) do
+    player_list_request("players", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s and draft position information.
+
+  ADP information includes how many drafts the player was selected 
+  in, the average pick, minimum pick and maximum pick.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=adp)
+  """
+
+  def adp(year, options \\ []) do
+    player_list_request("adp", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s and auction value information.
+
+  AAV information includes how many auctions the player was selected 
+  in and the average auction value. This value is normalized under the
+  assumption that $1,000 is available to all franchises in the auction.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=aav)
+  """
+
+  def aav(year, options \\ []) do
+    player_list_request("aav", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s for the most-added players in
+  MyFantasyLeague leagues.
+ 
+  The results are based on transactions  for a given week (specified 
+  in the options, e.g., `w: "2"`. If no week is specified, data for 
+  the most recent available week is returned. Each record also includes
+  the percentage of leagues in which the player was added that week.
+  the most recent available week is returned.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=topAdds)
+  """
+
+  def top_adds(year, options \\ []) do
+    player_list_request("topAdds", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s for the most-dropped players in
+  MyFantasyLeague leagues.
+ 
+  The results are based on transactions  for a given week (specified 
+  in the options, e.g., `w: "2"`. If no week is specified, data for 
+  the most recent available week is returned. Each record also includes
+  the percentage of leagues in which the player was dropped that week.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=topDrops)
+  """
+
+  def top_drops(year, options \\ []) do
+    player_list_request("topDrops", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s for the most-owned players in
+  MyFantasyLeague leagues.
+ 
+  The results are based on transactions  for a given week (specified 
+  in the options, e.g., `w: "2"`. If no week is specified, data for 
+  the most recent available week is returned. Each record also includes
+  the percentage of leagues in which the player was owned that week.
+  the most recent available week is returned.
+ 
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=topOwns)
+  """
+
+  def top_owns(year, options \\ []) do
+    player_list_request("topOwns", year, options)
+  end
+
+  @doc """
+  Returns a list of player `id`s for the most-started players in
+  MyFantasyLeague leagues.
+ 
+  The results are based on transactions  for a given week (specified 
+  in the options, e.g., `w: "2"`. If no week is specified, data for 
+  the most recent available week is returned. Each record also includes
+  the percentage of leagues in which the player was started that week.
+  the most recent available week is returned.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=topStarters)
+  """
+
+  def top_starters(year, options \\ []) do
+    player_list_request("topStarters", year, options)
   end
 
   @doc """
@@ -88,6 +174,19 @@ defmodule MFL do
         response.body
         |> Poison.decode!()
         |> Map.get("league")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  defp player_list_request(type, year, options) do
+    case fetch(type, year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get(type)
+        |> Map.get("player")
 
       {:error, message} ->
         %{error: message}
