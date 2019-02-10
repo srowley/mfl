@@ -3,19 +3,9 @@ defmodule MFL.Request do
   @moduledoc false 
 
   def fetch(type, year, options \\ []) do
-    cookie =
-      if Keyword.has_key?(options, :token) do
-        options
-        |> hd() 
-        |> elem(1)
-        |> cookie_for()
-      else
-        []
-      end
-
     response = 
       request_url(type, year, Keyword.delete(options, :token))
-      |> HTTPoison.get([], [follow_redirect: true] ++ cookie)
+      |> HTTPoison.get([], [follow_redirect: true] ++ cookie(options))
 
     case response do
       {:ok, %HTTPoison.Response{status_code: 200, body: ""}} ->
@@ -57,8 +47,17 @@ defmodule MFL.Request do
     |> Kernel.<>("&JSON=1")
   end
 
-  defp cookie_for(token) do
-    [hackney: [cookie: ["MFL_USER_ID=#{token}"]]]
+  defp cookie(options) do
+    if Keyword.has_key?(options, :token) do
+      token = 
+        options
+        |> hd() 
+        |> elem(1)
+
+     [hackney: [cookie: ["MFL_USER_ID=#{token}"]]]
+    else
+      []
+    end
   end
 
   # TODO: Be polite and sanitize params
