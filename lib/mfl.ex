@@ -60,29 +60,6 @@ defmodule MFL do
   end
 
   @doc """
-  Returns league descriptive and configuration data. This 
-  request has no optional parameters.
-
-  If passed an authentication token, additional details
-  for the authenticated user are included in the results.
-  This is currently only used internally to support 
-  `franchise_for_user\4`.
-
-  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
-  """
-  def league(year, league, token) do
-    case fetch("league", year, token: token, l: league) do
-      {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("league")
-
-      {:error, message} ->
-        %{error: message}
-    end
-  end
-
-  @doc """
   Returns the franchise `id` for the team owned by the specified
   user in the specified league.
 
@@ -101,5 +78,19 @@ defmodule MFL do
     |> Enum.filter(&(&1["username"] == username))
     |> List.first()
     |> Map.get("id")
+  end
+
+  # This is currently only used internally to support 
+  # `franchise_for_user\4`.
+  defp league(year, league, token) do
+    case fetch("league", year, token: token, l: league) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("league")
+
+      {:error, message} ->
+        %{error: message}
+    end
   end
 end
