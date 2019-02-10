@@ -13,8 +13,24 @@ defmodule MFL.Request do
         []
       end
 
-    request_url(type, year, Keyword.delete(options, :token))
-    |> HTTPoison.get([], [follow_redirect: true] ++ cookie)
+    response = 
+      request_url(type, year, Keyword.delete(options, :token))
+      |> HTTPoison.get([], [follow_redirect: true] ++ cookie)
+
+    case response do
+      {:ok, %HTTPoison.Response{status_code: 200, body: ""}} ->
+        {:error, "MFL returned no data; check year and parameters"}
+      {:ok, %HTTPoison.Response{status_code: 200}} ->
+        response
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:error, "MFL returned 'not found'; check year."}
+      {:ok, %HTTPoison.Response{status_code: 500}} ->
+        {:error, "MFL server error; check parameters."}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "HTTPoison error: #{reason}"}
+      _ ->
+        {:error, "Unknown error."}
+    end
   end
 
   def token(username, password) do

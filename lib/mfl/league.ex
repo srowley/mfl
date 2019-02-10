@@ -40,16 +40,20 @@ defmodule MFL.League do
   """
   def free_agents(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
-    {:ok, response} = fetch("freeAgents", year, options)
+    case fetch("freeAgents", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("freeAgents")
+        |> Map.get("leagueUnit")
+        |> Map.get("player")
+        |> Enum.map(&Map.take(&1, ["id"]))
+        |> Enum.map(&Map.values(&1))
+        |> List.flatten()
 
-    response.body
-    |> Poison.decode!()
-    |> Map.get("freeAgents")
-    |> Map.get("leagueUnit")
-    |> Map.get("player")
-    |> Enum.map(&Map.take(&1, ["id"]))
-    |> Enum.map(&Map.values(&1))
-    |> List.flatten()
+      {:error, message} ->
+        %{error: message}
+    end
   end
 
   @doc """
@@ -71,12 +75,16 @@ defmodule MFL.League do
   """
   def rosters(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
-    {:ok, response} = fetch("rosters", year, options)
+    case fetch("rosters", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("rosters")
+        |> Map.get("franchise")
 
-    response.body
-    |> Poison.decode!()
-    |> Map.get("rosters")
-    |> Map.get("franchise")
+      {:error, message} ->
+        %{error: message}
+    end
   end
 
   @doc """
@@ -94,12 +102,16 @@ defmodule MFL.League do
   http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustments&L=66666&JSON=1
   """
   def salary_adjustments(year, league) do
-    {:ok, response} = fetch("salaryAdjustments", year, [l: league])
+    case fetch("salaryAdjustments", year, [l: league]) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("salaryAdjustments")
+        |> Map.get("salaryAdjustment")
 
-    response.body
-    |> Poison.decode!()
-    |> Map.get("salaryAdjustments")
-    |> Map.get("salaryAdjustment")
+      {:error, message} ->
+        %{error: message}
+    end
   end
 
   @doc """
@@ -112,10 +124,14 @@ defmodule MFL.League do
   http://www59.myfantasyleague.com/2015/export&TYPE=league&L=35465&JSON=1
   """
   def league(year, league) do
-    {:ok, response} = fetch("league", year, [l: league])
+    case fetch("league", year, [l: league]) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("league")
 
-    response.body
-    |> Poison.decode!()
-    |> Map.get("league")
+      {:error, message} ->
+        %{error: message}
+    end
   end
 end

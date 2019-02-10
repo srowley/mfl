@@ -40,12 +40,16 @@ defmodule MFL do
   http://www.myfantasyleague.com/[YEAR HERE]/export&TYPE=players&JSON=1
   """
   def players(year, options \\ []) do
-    {:ok, response} = fetch("players", year, options)
-
-    response.body
-    |> Poison.decode!()
-    |> Map.get("players")
-    |> Map.get("player")
+    case fetch("players", year, options) do
+      {:ok, response} -> 
+        response.body
+        |> Poison.decode!()
+        |> Map.get("players")
+        |> Map.get("player")
+      
+      {:error, message} ->
+        %{error: message}
+    end
   end
 
   @doc """
@@ -58,11 +62,15 @@ defmodule MFL do
   franchise.
   """
   def league(year, league, token) do
-    {:ok, response} = fetch("league", year, [token: token, l: league])
-
-    response.body
-    |> Poison.decode!()
-    |> Map.get("league")
+    case fetch("league", year, [token: token, l: league]) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("league")
+      
+      {:error, message} ->
+        %{error: message}
+    end
   end
 
   @doc """
