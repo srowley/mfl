@@ -41,12 +41,12 @@ defmodule MFL do
   """
   def players(year, options \\ []) do
     case fetch("players", year, options) do
-      {:ok, response} -> 
+      {:ok, response} ->
         response.body
         |> Poison.decode!()
         |> Map.get("players")
         |> Map.get("player")
-      
+
       {:error, message} ->
         %{error: message}
     end
@@ -62,12 +62,12 @@ defmodule MFL do
   franchise.
   """
   def league(year, league, token) do
-    case fetch("league", year, [token: token, l: league]) do
+    case fetch("league", year, token: token, l: league) do
       {:ok, response} ->
         response.body
         |> Poison.decode!()
         |> Map.get("league")
-      
+
       {:error, message} ->
         %{error: message}
     end

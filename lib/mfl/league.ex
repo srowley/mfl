@@ -12,7 +12,7 @@ defmodule MFL.League do
   "end_point(year, id, options)" where the id
   is a league id and the MFL endpoint name is
   "endPoint".
-  
+
   Because the year is in all likelihood going 
   to be a configured value applicable across 
   all leagues, it can be convenient to set its
@@ -34,12 +34,13 @@ defmodule MFL.League do
 
   position: ("QB", "RB", etc.)
   filters list by position
-  
+
   Sample document:
   http://www59.myfantasyleague.com/2015/export&TYPE=freeAgents&L=35465&JSON=1
   """
   def free_agents(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
+
     case fetch("freeAgents", year, options) do
       {:ok, response} ->
         response.body
@@ -75,6 +76,7 @@ defmodule MFL.League do
   """
   def rosters(year, league, options \\ []) do
     options = Keyword.merge([l: league], options)
+
     case fetch("rosters", year, options) do
       {:ok, response} ->
         response.body
@@ -102,7 +104,7 @@ defmodule MFL.League do
   http://www.myfantasyleague.com/2018/export&TYPE=salaryAdjustments&L=66666&JSON=1
   """
   def salary_adjustments(year, league) do
-    case fetch("salaryAdjustments", year, [l: league]) do
+    case fetch("salaryAdjustments", year, l: league) do
       {:ok, response} ->
         response.body
         |> Poison.decode!()
@@ -124,7 +126,7 @@ defmodule MFL.League do
   http://www59.myfantasyleague.com/2015/export&TYPE=league&L=35465&JSON=1
   """
   def league(year, league) do
-    case fetch("league", year, [l: league]) do
+    case fetch("league", year, l: league) do
       {:ok, response} ->
         response.body
         |> Poison.decode!()

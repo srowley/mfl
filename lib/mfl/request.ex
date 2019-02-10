@@ -1,25 +1,31 @@
 defmodule MFL.Request do
-  @base_url Application.get_env(:mfl, :base_url) 
-  @moduledoc false 
+  @base_url Application.get_env(:mfl, :base_url)
+  @moduledoc false
 
   def fetch(type, year, options \\ []) do
-    response = 
+    response =
       request_url(type, year, Keyword.delete(options, :token))
       |> HTTPoison.get([], [follow_redirect: true] ++ cookie(options))
 
     case response do
       {:ok, %HTTPoison.Response{status_code: 200, body: ""}} ->
         {:error, "MFL returned no data; check year and parameters"}
+
       {:ok, %HTTPoison.Response{status_code: 200}} ->
         response
+
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, "MFL returned 'not found'; check year."}
+
       {:ok, %HTTPoison.Response{status_code: 500}} ->
         {:error, "MFL server error; check parameters."}
+
       {:ok, %HTTPoison.Response{status_code: status_code}} ->
         {:error, "Error - HTTP status code #{status_code}"}
+
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "HTTPoison error: #{reason}"}
+
       _ ->
         {:error, "Unknown error."}
     end
@@ -29,7 +35,7 @@ defmodule MFL.Request do
     base = "https://api.myfantasyleague.com/2018/login?"
     params = "USERNAME=#{username}&PASSWORD=#{password}&XML=1"
     response = HTTPoison.get!(base <> params)
-  
+
     response.headers
     |> Map.new()
     |> Map.get("Set-Cookie")
@@ -49,12 +55,12 @@ defmodule MFL.Request do
 
   defp cookie(options) do
     if Keyword.has_key?(options, :token) do
-      token = 
+      token =
         options
-        |> hd() 
+        |> hd()
         |> elem(1)
 
-     [hackney: [cookie: ["MFL_USER_ID=#{token}"]]]
+      [hackney: [cookie: ["MFL_USER_ID=#{token}"]]]
     else
       []
     end
@@ -62,7 +68,9 @@ defmodule MFL.Request do
 
   # TODO: Be polite and sanitize params
   defp to_params([]), do: ""
+
   defp to_params(options) do
-    "&" <> Enum.map_join(options, "&", fn {k, v} -> Atom.to_string(k) <> "=" <> v end) |> String.upcase()
+    ("&" <> Enum.map_join(options, "&", fn {k, v} -> Atom.to_string(k) <> "=" <> v end))
+    |> String.upcase()
   end
 end
