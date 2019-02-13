@@ -45,7 +45,7 @@ defmodule MFL.Request do
     |> List.last()
   end
 
-  defp request_url(type, year, options \\ %{}) do
+  defp request_url(type, year, options) do
     @base_url
     |> Kernel.<>("/#{year}/export?")
     |> Kernel.<>("TYPE=#{type}")
