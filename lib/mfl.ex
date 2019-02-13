@@ -29,6 +29,166 @@ defmodule MFL do
 
   import MFL.Request
 
+
+  @doc """
+  Returns a list of all MFL rule/scoring setting codes 
+  and their descriptions.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=allRules)
+  """
+  def all_rules(year, options \\ []) do
+    case fetch("allRules", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("allRules")
+        |> Map.get("rule")
+        |> flatten_maps(["abbreviation", "shortDescription", "detailedDescription"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+
+  @doc """
+  Returns a list of `id`s for players that are on the
+  injury report for a given week.
+  
+  The week can be specified as an option, (i.e., `w: "2"`);
+  if no week is provided the request defaults to the most 
+  recent week available. 
+
+  The returned map includes a Unix timestamp indicating when
+  the data was last updated and the applicable week.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=injuries)
+  """
+  def injuries(year, options \\ []) do
+    case fetch("injuries", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("injuries")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of maps with information about each NFL
+  game for the specified week.
+  
+  The week can be specified as an option, (i.e., `w: "2"`);
+  if no week is provided the request defaults to the most 
+  recent week available. 
+
+  This data includes pre-game information (point spread,
+  offense/defense rank) and in-game information (score,
+  team with possession, etc.) The MyFantasyLeague documentation
+  notes that this information is only updated every two minutes
+  and that more frequent calls are considered abuse of its
+  system. 
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=nflSchedule)
+  """
+  def nfl_schedule(year, options \\ []) do
+    case fetch("nflSchedule", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("nflSchedule")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of NFL teams and their bye week for the
+  specified year.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=nflByeWeeks)
+  """
+  def nfl_bye_weeks(year, options \\ []) do
+    case fetch("nflByeWeeks", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("nflByeWeeks")
+        |> Map.get("team")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of leagues with names that contain the
+  search string.
+
+  The search is case-insensitive.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=leagueSearch)
+  """
+  def league_search(year, search)do
+    case fetch("leagueSearch", year, search: search) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("leagues")
+        |> Map.get("league")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns personal data for the given player, e.g.,
+  height, weight, date of birth.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=playerProfile)
+  """
+  def player_profile(year, player_id) do
+    case fetch("playerProfile", year, p: player_id) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("playerProfile")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of pairs of players, `"shouldStart"` and
+  `"shouldBench"`. 
+  
+  Also returns the percentage of the time `"shouldStart"` was 
+  preferred and how many teams made lineup decision between 
+  the two. Can be passed an applicable week (if not provided
+  defaults to most recent week).
+
+  Results can be limited to players owned by a certain franchise
+  by passing a franchise, i.e. `f: "0001"`.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=whoShouldIStart)
+  """
+  def who_should_i_start(year, options \\ []) do
+    case fetch("whoShouldIStart", year, options) do
+      {:ok, response} ->
+        response.body
+        |> Poison.decode!()
+        |> Map.get("whoShouldIStart")
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
   @doc """
   Returns the entire list of players in the MFL database
   with basic details.
@@ -178,6 +338,14 @@ defmodule MFL do
       {:error, message} ->
         %{error: message}
     end
+  end
+
+  defp flatten_maps(map_list, nodes) do
+    Enum.map(map_list, &(flatten_nodes(&1, nodes)))
+  end
+
+  defp flatten_nodes(map, nodes) do
+    Enum.reduce(nodes, map, &(Map.put(&2, &1, &2[&1]["$t"])))
   end
 
   defp player_list_request(type, year, options) do
