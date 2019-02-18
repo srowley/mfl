@@ -24,14 +24,8 @@ defmodule MFL.League do
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
   """
-  def league(year, league) do
-    case fetch_league("league", year, league) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["league"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+  def league(year, league, options \\ []) do
+    retrieve_league_node(["league"], year, league, options)
   end
 
   @doc """
@@ -43,13 +37,14 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=rules)
   """
   def rules(year, league, options \\ []) do
-    case fetch_league("rules", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["rules", "positionRules"])
-        |> flatten_rules()
+    records = retrieve_league_node(["rules", "positionRules"], year, league, options)
+    case records do
 
       {:error, message} ->
-        %{error: message}
+        {:error, message}
+
+      records -> 
+        flatten_rules(records)
     end
   end
 
@@ -65,13 +60,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=rosters)
   """
   def rosters(year, league, options \\ []) do
-    case fetch_league("rosters", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["rosters", "franchise"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["rosters", "franchise"], year, league, options)
   end
 
   @doc """
@@ -87,13 +76,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=salaries)
   """
   def salaries(year, league, options \\ []) do
-    case fetch_league("salaries", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["salaries", "leagueUnit", "player"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["salaries", "leagueUnit", "player"], year, league, options)
   end
 
   @doc """
@@ -102,13 +85,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=leagueStandings)
   """
   def league_standings(year, league, options \\ []) do
-    case fetch_league("leagueStandings", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["leagueStandings", "franchise"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["leagueStandings", "franchise"], year, league, options)
   end
 
   @doc """
@@ -122,13 +99,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=schedule)
   """
   def schedule(year, league, options \\ []) do
-    case fetch_league("schedule", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["schedule", "weeklySchedule"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["schedule", "weeklySchedule"], year, league, options)
   end
 
   @doc """
@@ -141,13 +112,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=weeklyResults)
   """
   def weekly_results(year, league, options \\ []) do
-    case fetch_league("weeklyResults", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["weeklyResults"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["weeklyResults"], year, league, options)
   end
 
   @doc """
@@ -159,13 +124,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=liveScoring)
   """
   def live_scoring(year, league, options \\ []) do
-    case fetch_league("liveScoring", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["liveScoring"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["liveScoring"], year, league, options)
   end
 
   @doc """
@@ -180,13 +139,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=playerScores)
   """
   def player_scores(year, league, options \\ []) do
-    case fetch_league("playerScores", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["playerScores"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["playerScores"], year, league, options)
   end
 
   @doc """
@@ -195,13 +148,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=draftResults)
   """
   def draft_results(year, league, options \\ []) do
-    case fetch_league("draftResults", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["draftResults", "draftUnit"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["draftResults", "draftUnit"], year, league, options)
   end
 
   @doc """
@@ -210,13 +157,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=futureDraftPicks)
   """
   def future_draft_picks(year, league, options \\ []) do
-    case fetch_league("futureDraftPicks", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["futureDraftPicks", "franchise"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["futureDraftPicks", "franchise"], year, league, options)
   end
 
   @doc """
@@ -225,13 +166,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=auctionResults)
   """
   def auction_results(year, league, options \\ []) do
-    case fetch_league("auctionResults", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["auctionResults", "auctionUnit", "auction"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["auctionResults", "auctionUnit", "auction"], year, league, options)
   end
 
   @doc """
@@ -245,15 +180,17 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=freeAgents)
   """
   def free_agents(year, league, options \\ []) do
-    case fetch_league("freeAgents", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["freeAgents", "leagueUnit", "player"])
-        |> Enum.map(&Map.take(&1, ["id"]))
-        |> Enum.map(&Map.values(&1))
-        |> List.flatten()
+    decoded = retrieve_league_node(["freeAgents", "leagueUnit", "player"], year, league, options)
+    case decoded do
 
       {:error, message} ->
         %{error: message}
+        
+      records ->
+        records
+        |> Enum.map(&Map.take(&1, ["id"]))
+        |> Enum.map(&Map.values(&1))
+        |> List.flatten()
     end
   end
 
@@ -276,13 +213,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=transactions)
   """
   def transactions(year, league, options \\ []) do
-    case fetch_league("transactions", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["transactions", "transaction"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["transactions", "transaction"], year, league, options)
   end
 
   @doc """
@@ -300,13 +231,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=projectedScores)
   """
   def projected_scores(year, league, options \\ []) do
-    case fetch_league("projectedScores", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["projectedScores"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["projectedScores"], year, league, options)
   end
 
   @doc """
@@ -318,13 +243,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=messageBoard)
   """
   def message_board(year, league, options \\ []) do
-    case fetch_league("messageBoard", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["messageBoard", "thread"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["messageBoard", "thread"], year, league, options)
   end
 
   @doc """
@@ -334,14 +253,7 @@ defmodule MFL.League do
   """
   def message_board_thread(year, league, thread, options \\ []) do
     options = Keyword.merge(options, [thread: thread])
-
-    case fetch_league("messageBoardThread", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["messageBoardThread", "post"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["messageBoardThread", "post"], year, league, options)
   end
 
   @doc """
@@ -392,13 +304,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=pointsAllowed)
   """
   def points_allowed(year, league, options \\ []) do
-    case fetch_league("pointsAllowed", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["pointsAllowed", "team"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["pointsAllowed", "team"], year, league, options)
   end
 
   @doc """
@@ -422,13 +328,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=appearance)
   """
   def appearance(year, league, options \\ []) do
-    case fetch_league("appearance", year, league, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["appearance"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_league_node(["appearance"], year, league, options)
   end
 
   @doc """
@@ -444,14 +344,8 @@ defmodule MFL.League do
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=salaryAdjustments)
   """
-  def salary_adjustments(year, league) do
-    case fetch_league("salaryAdjustments", year, league) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["salaryAdjustments", "salaryAdjustment"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+  def salary_adjustments(year, league, options \\ []) do
+    retrieve_league_node(["salaryAdjustments", "salaryAdjustment"], year, league, options)
   end
 
   defp flatten_rules(map) when is_map(map) do

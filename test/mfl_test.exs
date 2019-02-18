@@ -242,7 +242,7 @@ defmodule MFLTest do
         Plug.Conn.resp(conn, 404, "Not Found.")
       end)
 
-      assert MFL.players("blah") == %{error: "MFL returned 'not found'; check year."}
+      assert MFL.players("blah") == {:error, "MFL returned 'not found'; check year."}
     end
   end
 

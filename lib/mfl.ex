@@ -62,13 +62,7 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=injuries)
   """
   def injuries(year, options \\ []) do
-    case fetch("injuries", year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["injuries"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_mfl_node(["injuries"], year, options)
   end
 
   @doc """
@@ -89,13 +83,7 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=nflSchedule)
   """
   def nfl_schedule(year, options \\ []) do
-    case fetch("nflSchedule", year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["nflSchedule"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_mfl_node(["nflSchedule"], year, options)
   end
 
   @doc """
@@ -105,13 +93,7 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=nflByeWeeks)
   """
   def nfl_bye_weeks(year, options \\ []) do
-    case fetch("nflByeWeeks", year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["nflByeWeeks", "team"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_mfl_node(["nflByeWeeks", "team"], year, options)
   end
 
   @doc """
@@ -139,13 +121,7 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=playerProfile)
   """
   def player_profile(year, player_id) do
-    case fetch("playerProfile", year, p: player_id) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["playerProfile"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_mfl_node(["playerProfile"], year, p: player_id)
   end
 
   @doc """
@@ -163,13 +139,7 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=whoShouldIStart)
   """
   def who_should_i_start(year, options \\ []) do
-    case fetch("whoShouldIStart", year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["whoShouldIStart"])
-
-      {:error, message} ->
-        %{error: message}
-    end
+    retrieve_mfl_node(["whoShouldIStart"], year, options)
   end
 
   @doc """
@@ -191,7 +161,7 @@ defmodule MFL do
   """
 
   def players(year, options \\ []) do
-    player_list_request("players", year, options)
+    retrieve_mfl_node(["players", "player"], year, options)
   end
 
   @doc """
@@ -204,7 +174,7 @@ defmodule MFL do
   """
 
   def adp(year, options \\ []) do
-    player_list_request("adp", year, options)
+    retrieve_mfl_node(["adp", "player"], year, options)
   end
 
   @doc """
@@ -218,7 +188,7 @@ defmodule MFL do
   """
 
   def aav(year, options \\ []) do
-    player_list_request("aav", year, options)
+    retrieve_mfl_node(["aav", "player"], year, options)
   end
 
   @doc """
@@ -235,7 +205,7 @@ defmodule MFL do
   """
 
   def top_adds(year, options \\ []) do
-    player_list_request("topAdds", year, options)
+    retrieve_mfl_node(["topAdds", "player"], year, options)
   end
 
   @doc """
@@ -251,7 +221,7 @@ defmodule MFL do
   """
 
   def top_drops(year, options \\ []) do
-    player_list_request("topDrops", year, options)
+    retrieve_mfl_node(["topDrops", "player"], year, options)
   end
 
   @doc """
@@ -268,7 +238,7 @@ defmodule MFL do
   """
 
   def top_owns(year, options \\ []) do
-    player_list_request("topOwns", year, options)
+    retrieve_mfl_node(["topOwns", "player"], year, options)
   end
 
   @doc """
@@ -285,7 +255,7 @@ defmodule MFL do
   """
 
   def top_starters(year, options \\ []) do
-    player_list_request("topStarters", year, options)
+    retrieve_mfl_node(["topStarters", "player"], year, options)
   end
 
   @doc """
@@ -327,15 +297,5 @@ defmodule MFL do
 
   defp flatten_nodes(map, nodes) do
     Enum.reduce(nodes, map, &(Map.put(&2, &1, &2[&1]["$t"])))
-  end
-
-  defp player_list_request(type, year, options) do
-    case fetch(type, year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, [type, "player"])
-
-      {:error, message} ->
-        %{error: message}
-    end
   end
 end

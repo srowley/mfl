@@ -35,8 +35,32 @@ defmodule MFL.Request do
     fetch(type, year, Keyword.merge(options, [l: league]))
   end
 
+  def retrieve_mfl_node([root | _children] = node_list, year, options \\ []) do
+    with {:ok, response} <- fetch(root, year, options),
+         {:ok, decoded} <- Poison.decode(response.body)
+
+         do
+           Enum.reduce(node_list, decoded, &(Map.get(&2, &1)))
+         else
+           error -> error
+         end
+  end
+
+  def retrieve_league_node(node_list, year, league, options \\ []) do
+    retrieve_mfl_node(node_list, year, Keyword.merge(options, [l: league]))
+  end
+
   def decode_nodes(body, nodes) do
-    Enum.reduce(nodes, Poison.decode!(body), &(Map.get(&2, &1)))
+    case Poison.decode(body) do
+      {:ok, decoded} ->
+        Enum.reduce(nodes, decoded, &(Map.get(&2, &1)))
+
+      {:error, error} ->
+        {:error, error.message}
+
+      _ ->
+        {:error, "Unknown error."}
+    end
   end
 
   def token(username, password) do
