@@ -39,10 +39,7 @@ defmodule MFL do
   def all_rules(year, options \\ []) do
     case fetch("allRules", year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("allRules")
-        |> Map.get("rule")
+        decode_nodes(response.body, ["allRules", "rule"])
         |> flatten_maps(["abbreviation", "shortDescription", "detailedDescription"])
 
       {:error, message} ->
@@ -67,9 +64,7 @@ defmodule MFL do
   def injuries(year, options \\ []) do
     case fetch("injuries", year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("injuries")
+        decode_nodes(response.body, ["injuries"])
 
       {:error, message} ->
         %{error: message}
@@ -96,9 +91,7 @@ defmodule MFL do
   def nfl_schedule(year, options \\ []) do
     case fetch("nflSchedule", year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("nflSchedule")
+        decode_nodes(response.body, ["nflSchedule"])
 
       {:error, message} ->
         %{error: message}
@@ -114,10 +107,7 @@ defmodule MFL do
   def nfl_bye_weeks(year, options \\ []) do
     case fetch("nflByeWeeks", year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("nflByeWeeks")
-        |> Map.get("team")
+        decode_nodes(response.body, ["nflByeWeeks", "team"])
 
       {:error, message} ->
         %{error: message}
@@ -135,10 +125,7 @@ defmodule MFL do
   def league_search(year, search)do
     case fetch("leagueSearch", year, search: search) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("leagues")
-        |> Map.get("league")
+        decode_nodes(response.body, ["leagues", "league"])
 
       {:error, message} ->
         %{error: message}
@@ -154,9 +141,7 @@ defmodule MFL do
   def player_profile(year, player_id) do
     case fetch("playerProfile", year, p: player_id) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("playerProfile")
+        decode_nodes(response.body, ["playerProfile"])
 
       {:error, message} ->
         %{error: message}
@@ -180,9 +165,7 @@ defmodule MFL do
   def who_should_i_start(year, options \\ []) do
     case fetch("whoShouldIStart", year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("whoShouldIStart")
+        decode_nodes(response.body, ["whoShouldIStart"])
 
       {:error, message} ->
         %{error: message}
@@ -331,9 +314,7 @@ defmodule MFL do
   defp league(year, league, token) do
     case fetch("league", year, token: token, l: league) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("league")
+        decode_nodes(response.body, ["league"])
 
       {:error, message} ->
         %{error: message}
@@ -351,10 +332,7 @@ defmodule MFL do
   defp player_list_request(type, year, options) do
     case fetch(type, year, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get(type)
-        |> Map.get("player")
+        decode_nodes(response.body, [type, "player"])
 
       {:error, message} ->
         %{error: message}

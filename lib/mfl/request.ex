@@ -31,6 +31,14 @@ defmodule MFL.Request do
     end
   end
 
+  def fetch_league(type, year, league, options \\ []) do
+    fetch(type, year, Keyword.merge(options, [l: league]))
+  end
+
+  def decode_nodes(body, nodes) do
+    Enum.reduce(nodes, Poison.decode!(body), &(Map.get(&2, &1)))
+  end
+
   def token(username, password) do
     base = "https://api.myfantasyleague.com/2018/login?"
     params = "USERNAME=#{username}&PASSWORD=#{password}&XML=1"
