@@ -17,28 +17,36 @@ defmodule MFL.League do
   import MFL.Request
 
   @doc """
-  Returns a list of player `id`s for free agents.
+  Returns league settings data for the specified league.
 
-  Just `id`s are returned; these must then be merged with data 
-  from the other requests (e.g. `MFL.players/2` or elsewhere 
-  to incorporate any related data such as the player's name or 
-  team.
+  Also includes some franchise information and links to previous years'
+  home pages for that league.
 
-  [MyFantastyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=freeAgents)
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
   """
-  def free_agents(year, league, options \\ []) do
-    options = Keyword.merge([l: league], options)
-
-    case fetch("freeAgents", year, options) do
+  def league(year, league) do
+    case fetch_league("league", year, league) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("freeAgents")
-        |> Map.get("leagueUnit")
-        |> Map.get("player")
-        |> Enum.map(&Map.take(&1, ["id"]))
-        |> Enum.map(&Map.values(&1))
-        |> List.flatten()
+        decode_nodes(response.body, ["league"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns league rules for a given league.
+
+  Rules are labelled using abbreviations; descriptions
+  for rule abbreviations are available via `MFL.all_rules\2`
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=rules)
+  """
+  def rules(year, league, options \\ []) do
+    case fetch_league("rules", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["rules", "positionRules"])
+        |> flatten_rules()
 
       {:error, message} ->
         %{error: message}
@@ -57,14 +65,366 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=rosters)
   """
   def rosters(year, league, options \\ []) do
-    options = Keyword.merge([l: league], options)
-
-    case fetch("rosters", year, options) do
+    case fetch_league("rosters", year, league, options) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("rosters")
-        |> Map.get("franchise")
+        decode_nodes(response.body, ["rosters", "franchise"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of player contract information.
+
+  Note that salary values are returned as strings,
+  and the associated numbers may/may not have decimal
+  values.
+
+  This appears somewhat arbitrary and not related to whether
+  the league settings allow for sub-$1 salaries.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=salaries)
+  """
+  def salaries(year, league, options \\ []) do
+    case fetch_league("salaries", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["salaries", "leagueUnit", "player"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of franchises and league standings.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=leagueStandings)
+  """
+  def league_standings(year, league, options \\ []) do
+    case fetch_league("leagueStandings", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["leagueStandings", "franchise"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of weekly matchup information.
+
+  The returned data include score and winning/losing
+  franchise in each matchup for each week. The results
+  can be filtered by week and/or franchise via the `w:`
+  and `f:` options.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=schedule)
+  """
+  def schedule(year, league, options \\ []) do
+    case fetch_league("schedule", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["schedule", "weeklySchedule"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of weekly team/player scores.
+
+  A week number (as a string) or `"YTD"` can provided
+  to specify a week or weeks; otherwise results default
+  to the current week. 
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=weeklyResults)
+  """
+  def weekly_results(year, league, options \\ []) do
+    case fetch_league("weeklyResults", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["weeklyResults"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns live scoring results for a given week. 
+
+  A week number (as a string) to specify a week or weeks; 
+  otherwise results default to the current week. 
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=liveScoring)
+  """
+  def live_scoring(year, league, options \\ []) do
+    case fetch_league("liveScoring", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["liveScoring"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns all player scores (including free agents) for a given week. 
+
+  This request supports options for filtering by week, year,
+  position, and specific player as well as other summary options.
+  Note that per the documentation the league ID is optional, but
+  calls without a league ID do not appear to produce meaningful data
+  and are not supported.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=playerScores)
+  """
+  def player_scores(year, league, options \\ []) do
+    case fetch_league("playerScores", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["playerScores"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns draft results for specified league
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=draftResults)
+  """
+  def draft_results(year, league, options \\ []) do
+    case fetch_league("draftResults", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["draftResults", "draftUnit"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of future draft picks by franchise.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=futureDraftPicks)
+  """
+  def future_draft_picks(year, league, options \\ []) do
+    case fetch_league("futureDraftPicks", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["futureDraftPicks", "franchise"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of auction results
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=auctionResults)
+  """
+  def auction_results(year, league, options \\ []) do
+    case fetch_league("auctionResults", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["auctionResults", "auctionUnit", "auction"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns a list of player `id`s for free agents.
+
+  Just `id`s are returned; these must then be merged with data 
+  from the other requests (e.g. `MFL.players/2` or elsewhere 
+  to incorporate any related data such as the player's name or 
+  team.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=freeAgents)
+  """
+  def free_agents(year, league, options \\ []) do
+    case fetch_league("freeAgents", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["freeAgents", "leagueUnit", "player"])
+        |> Enum.map(&Map.take(&1, ["id"]))
+        |> Enum.map(&Map.values(&1))
+        |> List.flatten()
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of transactions.
+
+  Supports several filters, e.g. week, franchise, transcation type 
+  and number of days. 
+
+  Note that the maps for different types of transactions have different
+  keys. Add/drop-type transactions also appear to have a kind of pipe notation
+  such that the `"transaction"` key for this kind of transaction may look like:
+
+  ```
+  "transaction" => "1234,|2|,6789" # $2 bid on player 1234, drop 6789
+  "transaction" => "1234,|1|"      # $1 bid on player 1234, drop no one 
+  "transaction" => "|6789"         # drop 6789
+  ``` 
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=transactions)
+  """
+  def transactions(year, league, options \\ []) do
+    case fetch_league("transactions", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["transactions", "transaction"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of projected scores for specified players.
+
+  Note if only one players is returned, the return value is a map,
+  not a list with one map element.
+
+  Accepts week, position and free agent filters. Expects a player `id` 
+  or comma-delimited list. If no player is provided, it appears to 
+  return the projected score for an arbitrary player. If no week is 
+  provided, returns results for the current week. If `count:` is 
+  specified, returns that many arbitrary players.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=projectedScores)
+  """
+  def projected_scores(year, league, options \\ []) do
+    case fetch_league("projectedScores", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["projectedScores"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of message board topics (threads).
+
+  Each topic has an `"id"` key that can be passed to `MFL.League.message_board_thread/4'
+  as the `thread` argument.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=messageBoard)
+  """
+  def message_board(year, league, options \\ []) do
+    case fetch_league("messageBoard", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["messageBoard", "thread"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of messages for a given thread.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=messageBoardThread)
+  """
+  def message_board_thread(year, league, thread, options \\ []) do
+    options = Keyword.merge(options, [thread: thread])
+
+    case fetch_league("messageBoardThread", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["messageBoardThread", "post"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns players' "status".
+
+  Note if only one player is returned, the return value is a map,
+  not a list with one map element. If no week is specified, defaults
+  to the current week.
+
+  `"status"` appears to formatted as follows:
+
+  ```
+  "status" => "Joe's Team - S"                   # Started in specified week for Joe's Team
+  "status" => "Joe's Team - NS"                  # Did not start in specified week for Joe's Team
+  "status" => "Joe's Team - S<br  />Free Agent"  # Started in specified week for Joe's Team, now a free agent(?)
+  "status" => "Free Agent"                       # Was a free agent
+  ```
+
+  There may be other statuses heretofore unobserved.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=auctionResults)
+  """
+  # TODO: has to be a better way to implement conditional
+  def player_status(year, league, player_list, options \\ []) do
+    nodes =
+      cond do
+        length(player_list) > 1 ->
+          ["playerStatuses", "playerStatus"]
+        true ->
+          ["playerStatus"]
+      end
+
+    player_list = Enum.join(player_list, "%2C")
+    options = Keyword.merge(options, [p: player_list])
+
+    case fetch_league("playerStatus", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, nodes)
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of NFL teams and points allowed by position. 
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=pointsAllowed)
+  """
+  def points_allowed(year, league, options \\ []) do
+    case fetch_league("pointsAllowed", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["pointsAllowed", "team"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns list of NFL or fantasy pool picks.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=pool)
+  """
+  def pool(year, league, options \\ []) do
+    case fetch_league("pool", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["poolPicks"])
+
+      {:error, message} ->
+        %{error: message}
+    end
+  end
+
+  @doc """
+  Returns skins/tabs/home page modules set up by commissioner.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=appearance)
+  """
+  def appearance(year, league, options \\ []) do
+    case fetch_league("appearance", year, league, options) do
+      {:ok, response} ->
+        decode_nodes(response.body, ["appearance"])
 
       {:error, message} ->
         %{error: message}
@@ -85,35 +445,32 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=salaryAdjustments)
   """
   def salary_adjustments(year, league) do
-    case fetch("salaryAdjustments", year, l: league) do
+    case fetch_league("salaryAdjustments", year, league) do
       {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("salaryAdjustments")
-        |> Map.get("salaryAdjustment")
+        decode_nodes(response.body, ["salaryAdjustments", "salaryAdjustment"])
 
       {:error, message} ->
         %{error: message}
     end
   end
 
-  @doc """
-  Returns league settings data for the specified league.
+  defp flatten_rules(map) when is_map(map) do
+    Map.put(map, "rule", flatten_rule_node(Map.get(map, "rule")))
+  end
 
-  Also includes some franchise information and links to previous years'
-  home pages for that league.
+  defp flatten_rules(list) when is_list(list) do
+    Enum.map(list, &flatten_rules/1)
+  end
 
-  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=league)
-  """
-  def league(year, league) do
-    case fetch("league", year, l: league) do
-      {:ok, response} ->
-        response.body
-        |> Poison.decode!()
-        |> Map.get("league")
+  defp flatten_rule_node(list) when is_list(list) do
+    Enum.map(list, &(flatten_nodes(&1, ["event", "points", "range"])))
+  end
 
-      {:error, message} ->
-        %{error: message}
-    end
+  defp flatten_rule_node(map) when is_map(map) do
+    flatten_nodes(map, ["event", "points", "range"])
+  end
+
+  defp flatten_nodes(map, nodes) do
+    Enum.reduce(nodes, map, &(Map.put(&2, &1, &2[&1]["$t"])))
   end
 end
