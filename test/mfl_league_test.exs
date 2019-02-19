@@ -719,6 +719,22 @@ defmodule MFLLeagueTest do
     }
   end
 
+  test "playoff_brackets/3", %{league: league, year: year, bypass: bypass} do
+    body = ~s<{"version":"1.0","playoffBrackets":{"playoffBracket":[{"startWeekGames":"2","name":"Playoffs","startWeek":"14","teamsInvolved":"6","id":"1","bracketWinnerTitle":"Champion"}]},"encoding":"utf-8"}>
+    
+    bypass_success_expectation(bypass, league, year, "playoffBrackets", body)
+    assert League.playoff_brackets(year, league) == [
+      %{
+        "startWeekGames" => "2",
+        "name" => "Playoffs",
+        "startWeek" => "14",
+        "teamsInvolved" => "6",
+        "id" => "1",
+        "bracketWinnerTitle" => "Champion"
+      }
+    ]
+  end
+
   test "appearance/3", %{league: league, year: year, bypass: bypass} do
     body = ~s<{"version":"1.0","appearance":{"skin":"74","tab":[{"name":"Main","id":"0","module":[{"name":"COLUMN=100"}]}]},"encoding":"utf-8"}>
     

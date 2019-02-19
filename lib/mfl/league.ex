@@ -323,6 +323,15 @@ defmodule MFL.League do
   end
 
   @doc """
+  Returns a list of all playoff brackets for the league.
+
+  [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=playoffBrackets)
+  """
+  def playoff_brackets(year, league, options \\ []) do
+    retrieve_league_node(["playoffBrackets", "playoffBracket"], year, league, options)
+  end
+
+  @doc """
   Returns skins/tabs/home page modules set up by commissioner.
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=appearance)
