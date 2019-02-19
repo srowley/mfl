@@ -118,7 +118,7 @@ defmodule MFL.League do
   @doc """
   Returns live scoring results for a given week. 
 
-  A week number (as a string) to specify a week or weeks; 
+  Accepts week number option to specify a week or weeks; 
   otherwise results default to the current week. 
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=liveScoring)
@@ -237,7 +237,7 @@ defmodule MFL.League do
   @doc """
   Returns list of message board topics (threads).
 
-  Each topic has an `"id"` key that can be passed to `MFL.League.message_board_thread/4'
+  Each topic has an `"id"` key that can be passed to `MFL.League.message_board_thread/4`
   as the `thread` argument.
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=messageBoard)
