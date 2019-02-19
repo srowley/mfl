@@ -17,5 +17,16 @@ The remaining requests are low-priority given that the
 best way to consume them is to simply call the request
 directly and consume the output in an RSS reader.
 
-## v0.3.0 - TBD
-   * Add support for remaining exports that are league-specific
+## v0.3.0 - 18 Feb 2019 
+   * Added support for league-specific exports, except:
+     * pendingWaivers (no sample doc available for testing)
+     * pendingTrades (no sample doc available for testing)
+     * survivorPool (no sample doc available for testing)
+     * ics (just returns an .ics file league calendar)
+
+## v0.3.x TBD
+   * Catch at least some errors in league/year before request is made
+   * Refactor/reorganize tests for readability
+
+## v0.4.0 TBD
+   * Add support for import requests 
