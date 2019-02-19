@@ -37,16 +37,16 @@ defmodule MFL do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=allRules)
   """
   def all_rules(year, options \\ []) do
-    case fetch("allRules", year, options) do
-      {:ok, response} ->
-        decode_nodes(response.body, ["allRules", "rule"])
-        |> flatten_maps(["abbreviation", "shortDescription", "detailedDescription"])
-
+    decoded = retrieve_mfl_node(["allRules", "rule"], year, options)
+    case decoded do
       {:error, message} ->
-        %{error: message}
+        {:error, message}
+
+      decoded -> 
+        decoded
+        |> flatten_maps(["abbreviation", "shortDescription", "detailedDescription"])
     end
   end
-
 
   @doc """
   Returns a list of `id`s for players that are on the
