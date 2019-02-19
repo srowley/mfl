@@ -11,6 +11,9 @@ defmodule MFL.Request do
       {:ok, %HTTPoison.Response{status_code: 200, body: ""}} ->
         {:error, "MFL returned no data; check year and parameters"}
 
+      {:ok, %HTTPoison.Response{status_code: 200, body: ~s<{"version":"1.0","error":> <> _rest = body}} ->
+        {:error, Poison.decode!(body) |> Map.get("error") |> Map.get("$t")}
+
       {:ok, %HTTPoison.Response{status_code: 200}} ->
         response
 
@@ -35,6 +38,10 @@ defmodule MFL.Request do
     fetch(type, year, Keyword.merge(options, [l: league]))
   end
 
+  def fetch_authenticated(type, year, league, [{:token, _token} | _others] = options) do
+    fetch_league(type, year, league, options)
+  end
+
   def retrieve_mfl_node([root | _children] = node_list, year, options \\ []) do
     with {:ok, response} <- fetch(root, year, options),
          {:ok, decoded} <- Poison.decode(response.body)
@@ -48,6 +55,14 @@ defmodule MFL.Request do
 
   def retrieve_league_node(node_list, year, league, options \\ []) do
     retrieve_mfl_node(node_list, year, Keyword.merge(options, [l: league]))
+  end
+
+  def retrieve_authenticated_node(node_list, year, league, [{:token, _token} | _others] = options) do
+    retrieve_league_node(node_list, year, league, options)
+  end
+
+  def retrieve_authenticated_node(_node_list, _year, _league, _options) do
+    {:error, "Must provide authentication token as first option."}
   end
 
   def decode_nodes(body, nodes) do
