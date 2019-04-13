@@ -8,14 +8,8 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-# You can configure your application as:
-#
-#     config :mfl, key: :value
-#
-# and access this configuration in your application as:
-#
-#     Application.get_env(:mfl, :key)
-#
+     config :mfl, :base_url, "https://www.myfantasyleague.com"
+
 # You can also configure a 3rd-party app:
 #
 #     config :logger, level: :info
