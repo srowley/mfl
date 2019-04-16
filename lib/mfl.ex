@@ -279,6 +279,21 @@ defmodule MFL do
     |> Map.get("id")
   end
 
+  def commish_id(), do: "0001"
+ 
+  # TODO: implement this for real
+  # Code below does not work, just a start point 
+  # def commish_id(year, league, username, password) do
+  #   league(year, league, token(username, password))
+  #   |> Map.get("franchises")
+  #   |> Map.get("franchise")
+  #   |> Enum.filter(&(Map.has_key?(&1, "username")))
+  # end
+
+  def is_commish?(franchise_id) do
+    franchise_id == commish_id()
+  end
+
   # This is currently only used internally to support 
   # `franchise_for_user\4`.
   defp league(year, league, token) do
