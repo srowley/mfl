@@ -279,9 +279,9 @@ defmodule MFL do
     |> Map.get("id")
   end
 
-  def commish_id(), do: "0001"
- 
   # TODO: implement this for real
+  # def commish_id(), do: "0001"
+ 
   # Code below does not work, just a start point 
   # def commish_id(year, league, username, password) do
   #   league(year, league, token(username, password))
@@ -291,7 +291,8 @@ defmodule MFL do
   # end
 
   def is_commish?(franchise_id) do
-    franchise_id == commish_id()
+    # franchise_id == commish_id()
+    franchise_id in ["0001", "0002", "0007"] 
   end
 
   # This is currently only used internally to support 
