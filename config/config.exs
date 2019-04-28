@@ -9,6 +9,7 @@ use Mix.Config
 # 3rd-party users, it should be done in your "mix.exs" file.
 
      config :mfl, :base_url, "https://www.myfantasyleague.com"
+     config :mfl, :api_url, "https://api.myfantasyleague.com"
 
 # You can also configure a 3rd-party app:
 #

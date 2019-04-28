@@ -271,12 +271,21 @@ defmodule MFL do
   and contain leading zeroes.  
   """
   def franchise_for_user(year, league, username, password) do
-    league(year, league, token(username, password))
-    |> Map.get("franchises")
-    |> Map.get("franchise")
-    |> Enum.filter(&(&1["username"] == username))
-    |> List.first()
-    |> Map.get("id")
+    case token(year, username, password) do
+      {:ok, token} ->
+        league(year, league, token)
+        |> Map.get("franchises")
+        |> Map.get("franchise")
+        |> Enum.filter(&(&1["username"] == username))
+        |> List.first()
+        |> Map.get("id")
+
+      {:error, :not_authenticated} ->
+        {:error, :not_authenticated}
+
+      _ ->
+        {:error, :other_error}
+    end
   end
 
   # TODO: implement this for real
