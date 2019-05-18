@@ -129,4 +129,19 @@ defmodule MFLAuthenticatedTest do
       }
     ]    
   end
+
+  test "salary_adjustments/3", %{year: year, league: league, bypass: bypass} do
+    body = ~s<{"version":"1.0","salaryAdjustments":{"salaryAdjustment":[{"amount":"2.00","timestamp":"1373254913","franchise_id":"0001","id":"0","description":"kept of wright's salary after trade"}]},"encoding":"utf-8"}> 
+
+    bypass_success_expectation(bypass, league, year, "salaryAdjustments", body)
+    assert Authenticated.salary_adjustments(year, league, token: "TOKEN") == [
+     %{
+       "amount" => "2.00",
+       "timestamp" => "1373254913",
+       "franchise_id" => "0001",
+       "id" => "0",
+       "description" => "kept of wright's salary after trade"
+     }
+   ]
+  end
 end
