@@ -273,12 +273,15 @@ defmodule MFL do
   def franchise_for_user(year, league, username, password) do
     case token(year, username, password) do
       {:ok, token} ->
-        league(year, league, token)
-        |> Map.get("franchises")
-        |> Map.get("franchise")
-        |> Enum.filter(&(&1["username"] == username))
-        |> List.first()
-        |> Map.get("id")
+        franchise_id =
+          league(year, league, token)
+          |> Map.get("franchises")
+          |> Map.get("franchise")
+          |> Enum.filter(&(&1["username"] == username))
+          |> List.first()
+          |> Map.get("id")
+
+        {franchise_id, token}
 
       {:error, :not_authenticated} ->
         {:error, :not_authenticated}
