@@ -15,7 +15,7 @@ defmodule MFL do
   |Parameters       |DETAILS, SINCE, PLAYERS |`year`, `options` |
 
   `year` is a string corresponding to the league year.
- 
+
   `options` is a keyword list corresponding to the optional
   (downcased) request parameters, e.g. `[details: "1"]`. MFL is 
   designed to support optional parameters but this support is not 
@@ -29,7 +29,6 @@ defmodule MFL do
 
   import MFL.Request
 
-
   @doc """
   Returns a list of all MFL rule/scoring setting codes 
   and their descriptions.
@@ -38,11 +37,12 @@ defmodule MFL do
   """
   def all_rules(year, options \\ []) do
     decoded = retrieve_mfl_node(["allRules", "rule"], year, options)
+
     case decoded do
       {:error, message} ->
         {:error, message}
 
-      decoded -> 
+      decoded ->
         decoded
         |> flatten_maps(["abbreviation", "shortDescription", "detailedDescription"])
     end
@@ -51,7 +51,7 @@ defmodule MFL do
   @doc """
   Returns a list of `id`s for players that are on the
   injury report for a given week.
-  
+
   The week can be specified as an option, (i.e., `w: "2"`);
   if no week is provided the request defaults to the most 
   recent week available. 
@@ -68,7 +68,7 @@ defmodule MFL do
   @doc """
   Returns a list of maps with information about each NFL
   game for the specified week.
-  
+
   The week can be specified as an option, (i.e., `w: "2"`);
   if no week is provided the request defaults to the most 
   recent week available. 
@@ -104,7 +104,7 @@ defmodule MFL do
 
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=leagueSearch)
   """
-  def league_search(year, search)do
+  def league_search(year, search) do
     case fetch("leagueSearch", year, search: search) do
       {:ok, response} ->
         decode_nodes(response.body, ["leagues", "league"])
@@ -127,7 +127,7 @@ defmodule MFL do
   @doc """
   Returns a list of pairs of players, `"shouldStart"` and
   `"shouldBench"`. 
-  
+
   Also returns the percentage of the time `"shouldStart"` was 
   preferred and how many teams made lineup decision between 
   the two. Can be passed an applicable week (if not provided
@@ -156,7 +156,7 @@ defmodule MFL do
   this call given the size of the returned dataset (~2000 rows)
   and the fact that the data is typically updated no more
   frequently than once per day.
-  
+
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=players)
   """
 
@@ -194,7 +194,7 @@ defmodule MFL do
   @doc """
   Returns a list of player `id`s for the most-added players in
   MyFantasyLeague leagues.
- 
+
   The results are based on transactions  for a given week (specified 
   in the options, e.g., `w: "2"`. If no week is specified, data for 
   the most recent available week is returned. Each record also includes
@@ -211,7 +211,7 @@ defmodule MFL do
   @doc """
   Returns a list of player `id`s for the most-dropped players in
   MyFantasyLeague leagues.
- 
+
   The results are based on transactions  for a given week (specified 
   in the options, e.g., `w: "2"`. If no week is specified, data for 
   the most recent available week is returned. Each record also includes
@@ -227,13 +227,13 @@ defmodule MFL do
   @doc """
   Returns a list of player `id`s for the most-owned players in
   MyFantasyLeague leagues.
- 
+
   The results are based on transactions  for a given week (specified 
   in the options, e.g., `w: "2"`. If no week is specified, data for 
   the most recent available week is returned. Each record also includes
   the percentage of leagues in which the player was owned that week.
   the most recent available week is returned.
- 
+
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=topOwns)
   """
 
@@ -244,7 +244,7 @@ defmodule MFL do
   @doc """
   Returns a list of player `id`s for the most-started players in
   MyFantasyLeague leagues.
- 
+
   The results are based on transactions  for a given week (specified 
   in the options, e.g., `w: "2"`. If no week is specified, data for 
   the most recent available week is returned. Each record also includes
@@ -293,7 +293,7 @@ defmodule MFL do
 
   # TODO: implement this for real
   # def commish_id(), do: "0001"
- 
+
   # Code below does not work, just a start point 
   # def commish_id(year, league, username, password) do
   #   league(year, league, token(username, password))
@@ -304,7 +304,7 @@ defmodule MFL do
 
   def is_commish?(franchise_id) do
     # franchise_id == commish_id()
-    franchise_id in ["0001", "0002", "0007"] 
+    franchise_id in ["0001", "0002", "0007"]
   end
 
   # This is currently only used internally to support 
@@ -320,10 +320,10 @@ defmodule MFL do
   end
 
   defp flatten_maps(map_list, nodes) do
-    Enum.map(map_list, &(flatten_nodes(&1, nodes)))
+    Enum.map(map_list, &flatten_nodes(&1, nodes))
   end
 
   defp flatten_nodes(map, nodes) do
-    Enum.reduce(nodes, map, &(Map.put(&2, &1, &2[&1]["$t"])))
+    Enum.reduce(nodes, map, &Map.put(&2, &1, &2[&1]["$t"]))
   end
 end

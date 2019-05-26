@@ -8,8 +8,8 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-     config :mfl, :base_url, "https://www.myfantasyleague.com"
-     config :mfl, :api_url, "https://api.myfantasyleague.com"
+config :mfl, :base_url, "https://www.myfantasyleague.com"
+config :mfl, :api_url, "https://api.myfantasyleague.com"
 
 # You can also configure a 3rd-party app:
 #

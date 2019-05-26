@@ -25,6 +25,7 @@ defmodule MFLRequestTest do
       assert "/#{year}/login" == conn.request_path
       assert "USERNAME=user&PASSWORD=correct_password&XML=1" == conn.query_string
       assert "GET" == conn.method
+
       Plug.Conn.resp(conn, 200, "auth cookie passed")
       |> Plug.Conn.put_resp_header("Set-Cookie", "ABCD")
     end)

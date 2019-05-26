@@ -69,7 +69,7 @@ defmodule MFL.Authenticated do
   """
   def my_watch_list(year, league, options) do
     retrieve_authenticated_node(["myWatchList", "player"], year, league, options)
-    |> Enum.map(&(Map.get(&1,"id")))
+    |> Enum.map(&Map.get(&1, "id"))
   end
 
   @doc """
@@ -84,7 +84,7 @@ defmodule MFL.Authenticated do
   """
   def my_draft_list(year, league, options) do
     retrieve_authenticated_node(["myDraftList", "player"], year, league, options)
-    |> Enum.map(&(Map.get(&1,"id")))
+    |> Enum.map(&Map.get(&1, "id"))
   end
 
   @doc """
@@ -113,5 +113,4 @@ defmodule MFL.Authenticated do
   def salary_adjustments(year, league, options) do
     retrieve_authenticated_node(["salaryAdjustments", "salaryAdjustment"], year, league, options)
   end
-
 end

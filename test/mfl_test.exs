@@ -23,23 +23,25 @@ defmodule MFLTest do
     end)
 
     assert MFL.all_rules(year) == [
-      %{
-        "detailedDescription" => "This is the total number of Passing TDs in a game by a player or team.",
-        "isTeam" => "1",
-        "shortDescription" => "Number of Passing TDs",
-        "isCoach" => "0",
-        "isPlayer" => "1",
-        "abbreviation" => "#P"
-      },
-      %{
-        "detailedDescription" => "This is the length in yards of a passing TD in a game.  This rule is evaluated for EACH passing TD in a game.",
-        "isTeam" => "1",
-        "shortDescription" => "Length of Passing TD",
-        "isCoach" => "0",
-        "isPlayer" => "1",
-        "abbreviation" => "PS"
-      }
-    ]
+             %{
+               "detailedDescription" =>
+                 "This is the total number of Passing TDs in a game by a player or team.",
+               "isTeam" => "1",
+               "shortDescription" => "Number of Passing TDs",
+               "isCoach" => "0",
+               "isPlayer" => "1",
+               "abbreviation" => "#P"
+             },
+             %{
+               "detailedDescription" =>
+                 "This is the length in yards of a passing TD in a game.  This rule is evaluated for EACH passing TD in a game.",
+               "isTeam" => "1",
+               "shortDescription" => "Length of Passing TD",
+               "isCoach" => "0",
+               "isPlayer" => "1",
+               "abbreviation" => "PS"
+             }
+           ]
   end
 
   test "injuries/2", %{year: year, bypass: bypass} do
@@ -56,21 +58,21 @@ defmodule MFLTest do
     end)
 
     assert MFL.injuries(year) == %{
-      "timestamp" => "1549378814",
-      "week" => "22",
-      "injury" => [
-        %{
-          "status" => "IR",
-          "id" => "10005",
-          "details" => "Calf\n"
-        },
-        %{
-          "status" => "Ir-pup",
-          "id" => "10063",
-          "details" => "Knee - PCL\n"
-        }
-      ]
-    }
+             "timestamp" => "1549378814",
+             "week" => "22",
+             "injury" => [
+               %{
+                 "status" => "IR",
+                 "id" => "10005",
+                 "details" => "Calf\n"
+               },
+               %{
+                 "status" => "Ir-pup",
+                 "id" => "10063",
+                 "details" => "Knee - PCL\n"
+               }
+             ]
+           }
   end
 
   test "nfl_schedule/2", %{year: year, bypass: bypass} do
@@ -87,38 +89,38 @@ defmodule MFLTest do
     end)
 
     assert MFL.nfl_schedule(year) == %{
-      "week" => "21",
-      "matchup" => %{
-        "kickoff" => "1549236600",
-        "gameSecondsRemaining" => "0",
-        "team" => [
-          %{
-            "inRedZone" => "0",
-            "score" => "13",
-            "hasPossession" => "0",
-            "passOffenseRank" => "5",
-            "rushOffenseRank" => "5",
-            "passDefenseRank" => "22",
-            "rushDefenseRank" => "7",
-            "spread" => "-2.5",
-            "isHome" => "0",
-            "id" => "NEP"
-          },
-          %{
-            "inRedZone" => "0",
-            "score" => "3",
-            "hasPossession" => "0",
-            "passOffenseRank" => "6",
-            "rushOffenseRank" => "3",
-            "passDefenseRank" => "16",
-            "rushDefenseRank" => "18",
-            "spread" => "2.5",
-            "isHome" => "1",
-            "id" => "LAR"
-          }
-        ]
-      }
-    }
+             "week" => "21",
+             "matchup" => %{
+               "kickoff" => "1549236600",
+               "gameSecondsRemaining" => "0",
+               "team" => [
+                 %{
+                   "inRedZone" => "0",
+                   "score" => "13",
+                   "hasPossession" => "0",
+                   "passOffenseRank" => "5",
+                   "rushOffenseRank" => "5",
+                   "passDefenseRank" => "22",
+                   "rushDefenseRank" => "7",
+                   "spread" => "-2.5",
+                   "isHome" => "0",
+                   "id" => "NEP"
+                 },
+                 %{
+                   "inRedZone" => "0",
+                   "score" => "3",
+                   "hasPossession" => "0",
+                   "passOffenseRank" => "6",
+                   "rushOffenseRank" => "3",
+                   "passDefenseRank" => "16",
+                   "rushDefenseRank" => "18",
+                   "spread" => "2.5",
+                   "isHome" => "1",
+                   "id" => "LAR"
+                 }
+               ]
+             }
+           }
   end
 
   test "nfl_bye_weeks/2", %{year: year, bypass: bypass} do
@@ -135,15 +137,15 @@ defmodule MFLTest do
     end)
 
     assert MFL.nfl_bye_weeks(year) == [
-      %{
-        "bye_week" => "9",
-        "id" => "ARI"
-      },
-      %{
-        "bye_week" => "8",
-        "id" => "ATL"
-      }
-    ]
+             %{
+               "bye_week" => "9",
+               "id" => "ARI"
+             },
+             %{
+               "bye_week" => "8",
+               "id" => "ATL"
+             }
+           ]
   end
 
   test "league_search/2", %{year: year, bypass: bypass} do
@@ -160,17 +162,17 @@ defmodule MFLTest do
     end)
 
     assert MFL.league_search(year, "liga") == [
-      %{
-        "homeURL" => "http://www73.myfantasyleague.com/2018/home/10298",
-        "name" => "La Liga Clone 42",
-        "id" => "10298"
-      },
-      %{
-        "homeURL" => "http://www63.myfantasyleague.com/2018/home/10409",
-        "name" => "Keeper Ligaen 2007",
-        "id" => "10409"
-      }
-    ]
+             %{
+               "homeURL" => "http://www73.myfantasyleague.com/2018/home/10298",
+               "name" => "La Liga Clone 42",
+               "id" => "10298"
+             },
+             %{
+               "homeURL" => "http://www63.myfantasyleague.com/2018/home/10409",
+               "name" => "Keeper Ligaen 2007",
+               "id" => "10409"
+             }
+           ]
   end
 
   test "player_profile/2", %{year: year, bypass: bypass} do
@@ -187,31 +189,31 @@ defmodule MFLTest do
     end)
 
     assert MFL.player_profile(year, "8658") == %{
-      "name" => "Peterson, Adrian WAS RB",
-      "id" => "8658",
-      "news" => %{
-        "article" => [
-          %{
-            "published" => "4 days",
-            "id" => "410532RotoWire",
-            "headline" => "Adrian Peterson: Working to stay in Washington"
-          },
-          %{
-            "published" => "7 days",
-            "id" => "2019-02-05T12:41:00Rotoworld8658",
-            "headline" => "WAS has had 'preliminary talks' with Pet..."
-          }
-        ]
-      },
-      "player" => %{
-        "dob" => "Mar 21, 1985",
-        "adp" => "111.08",
-        "weight" => "220lbs",
-        "id" => "8658",
-        "height" => "6' 1\"",
-        "age" => "33"
-      }
-    }
+             "name" => "Peterson, Adrian WAS RB",
+             "id" => "8658",
+             "news" => %{
+               "article" => [
+                 %{
+                   "published" => "4 days",
+                   "id" => "410532RotoWire",
+                   "headline" => "Adrian Peterson: Working to stay in Washington"
+                 },
+                 %{
+                   "published" => "7 days",
+                   "id" => "2019-02-05T12:41:00Rotoworld8658",
+                   "headline" => "WAS has had 'preliminary talks' with Pet..."
+                 }
+               ]
+             },
+             "player" => %{
+               "dob" => "Mar 21, 1985",
+               "adp" => "111.08",
+               "weight" => "220lbs",
+               "id" => "8658",
+               "height" => "6' 1\"",
+               "age" => "33"
+             }
+           }
   end
 
   describe "MFL.players/2" do
@@ -260,21 +262,21 @@ defmodule MFLTest do
     end)
 
     assert MFL.adp(year) == [
-      %{
-        "minPick" => "1",
-        "maxPick" => "163",
-        "draftsSelectedIn" => "8990",
-        "id" => "11192",
-        "averagePick" => "3.04"
-      },
-      %{
-        "minPick" => "1",
-        "maxPick" => "188",
-        "draftsSelectedIn" => "8972",
-        "id" => "12625",
-        "averagePick" => "3.85"
-      }
-    ]
+             %{
+               "minPick" => "1",
+               "maxPick" => "163",
+               "draftsSelectedIn" => "8990",
+               "id" => "11192",
+               "averagePick" => "3.04"
+             },
+             %{
+               "minPick" => "1",
+               "maxPick" => "188",
+               "draftsSelectedIn" => "8972",
+               "id" => "12625",
+               "averagePick" => "3.85"
+             }
+           ]
   end
 
   test "aav/2", %{year: year, bypass: bypass} do
@@ -291,17 +293,17 @@ defmodule MFLTest do
     end)
 
     assert MFL.aav(year) == [
-      %{
-        "auctionsSelectedIn" => "670",
-        "id" => "13604",
-        "averageValue" => "23.45"
-      },
-      %{
-        "auctionsSelectedIn" => "1",
-        "id" => "0359",
-        "averageValue" => "23.33"
-      }
-    ]
+             %{
+               "auctionsSelectedIn" => "670",
+               "id" => "13604",
+               "averageValue" => "23.45"
+             },
+             %{
+               "auctionsSelectedIn" => "1",
+               "id" => "0359",
+               "averageValue" => "23.33"
+             }
+           ]
   end
 
   test "top_adds/2", %{year: year, bypass: bypass} do
@@ -318,14 +320,14 @@ defmodule MFLTest do
     end)
 
     assert MFL.top_adds(year, w: "2") == [
-      %{
-        "id" => "13614",
-        "percent" => "69.42"
-      },
-      %{
-        "id" => "13763",
-        "percent" => "60.21"
-      }
-    ]
+             %{
+               "id" => "13614",
+               "percent" => "69.42"
+             },
+             %{
+               "id" => "13763",
+               "percent" => "60.21"
+             }
+           ]
   end
 end

@@ -38,12 +38,12 @@ defmodule MFL.League do
   """
   def rules(year, league, options \\ []) do
     records = retrieve_league_node(["rules", "positionRules"], year, league, options)
-    case records do
 
+    case records do
       {:error, message} ->
         {:error, message}
 
-      records -> 
+      records ->
         flatten_rules(records)
     end
   end
@@ -181,11 +181,11 @@ defmodule MFL.League do
   """
   def free_agents(year, league, options \\ []) do
     decoded = retrieve_league_node(["freeAgents", "leagueUnit", "player"], year, league, options)
-    case decoded do
 
+    case decoded do
       {:error, message} ->
         %{error: message}
-        
+
       records ->
         records
         |> Enum.map(&Map.take(&1, ["id"]))
@@ -252,7 +252,7 @@ defmodule MFL.League do
   [MyFantasyLeague documentation](https://www03.myfantasyleague.com/2018/api_info?STATE=test&CMD=export&TYPE=messageBoardThread)
   """
   def message_board_thread(year, league, thread, options \\ []) do
-    options = Keyword.merge(options, [thread: thread])
+    options = Keyword.merge(options, thread: thread)
     retrieve_league_node(["messageBoardThread", "post"], year, league, options)
   end
 
@@ -282,12 +282,13 @@ defmodule MFL.League do
       cond do
         length(player_list) > 1 ->
           ["playerStatuses", "playerStatus"]
+
         true ->
           ["playerStatus"]
       end
 
     player_list = Enum.join(player_list, "%2C")
-    options = Keyword.merge(options, [p: player_list])
+    options = Keyword.merge(options, p: player_list)
 
     case fetch_league("playerStatus", year, league, options) do
       {:ok, response} ->
@@ -349,7 +350,7 @@ defmodule MFL.League do
   end
 
   defp flatten_rule_node(list) when is_list(list) do
-    Enum.map(list, &(flatten_nodes(&1, ["event", "points", "range"])))
+    Enum.map(list, &flatten_nodes(&1, ["event", "points", "range"]))
   end
 
   defp flatten_rule_node(map) when is_map(map) do
@@ -357,6 +358,6 @@ defmodule MFL.League do
   end
 
   defp flatten_nodes(map, nodes) do
-    Enum.reduce(nodes, map, &(Map.put(&2, &1, &2[&1]["$t"])))
+    Enum.reduce(nodes, map, &Map.put(&2, &1, &2[&1]["$t"]))
   end
 end
