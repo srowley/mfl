@@ -24,9 +24,9 @@ directly and consume the output in an RSS reader.
      * survivorPool (no sample doc available for testing)
      * ics (just returns an .ics file league calendar)
 
-## v0.3.x TBD
-   * Catch at least some errors in league/year before request is made
-   * Refactor/reorganize tests for readability
+## v0.4.0 - 25 May 2019
+   * Stub ability to identify commissioner
+   * Require authentication to retrieve salary adjustments following 2019 MFL API update
 
-## v0.4.0 TBD
-   * Add support for import requests 
+## v0.5.0 - TBD
+   * Support importing auction results
